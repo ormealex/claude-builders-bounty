@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """
-Bounty PR monitor — detects new maintainer activity on all open PRs by ormealex.
+Bounty PR monitor — detects new maintainer activity on ALL open PRs by ormealex,
+across every repo (claude-builders-bounty, Algora targets, IssueHunt, etc.).
 
 Outputs pending_fixes.json when actionable feedback is found, so the calling
-agent can implement the requested changes on the PR branch.
+agent can implement the requested changes on the correct PR branch.
+
+State keys use "owner/repo#number" format to avoid collisions across repos.
 
 Usage:
   GITHUB_TOKEN=ghp_... python3 pr_monitor.py
@@ -14,14 +17,14 @@ import os
 import sys
 import urllib.request
 import urllib.error
+import urllib.parse
 from datetime import datetime, timezone
 
 TOKEN = os.environ.get("GITHUB_TOKEN", "")
-TARGET = "claude-builders-bounty/claude-builders-bounty"
 FORK = "ormealex/claude-builders-bounty"
+OWNER = "ormealex"
 STATE_FILE = "pr_state.json"
 FIXES_FILE = "pending_fixes.json"
-OWNER = "ormealex"
 BOT_SUFFIXES = ("[bot]",)
 
 
@@ -35,10 +38,13 @@ def gh(path, method="GET", data=None):
         "User-Agent": "pr-monitor/1.0",
     })
     try:
-        with urllib.request.urlopen(req) as r:
+        with urllib.request.urlopen(req, timeout=15) as r:
             return json.loads(r.read())
     except urllib.error.HTTPError as e:
-        print(f"GitHub API error {e.code} for {path}: {e.read().decode()}", file=sys.stderr)
+        print(f"  GitHub API {e.code} {path}: {e.read().decode()[:200]}", file=sys.stderr)
+        return None
+    except Exception as e:
+        print(f"  GitHub API error {path}: {e}", file=sys.stderr)
         return None
 
 
@@ -58,9 +64,41 @@ def save_json(path, data):
         json.dump(data, f, indent=2)
 
 
+def repo_from_url(api_url):
+    """Extract owner/repo from a GitHub API repository URL."""
+    return api_url.replace("https://api.github.com/repos/", "").rstrip("/")
+
+
 def get_open_prs():
-    prs = gh(f"/repos/{TARGET}/pulls?state=open&per_page=100")
-    return [p for p in (prs or []) if p["user"]["login"] == OWNER]
+    """
+    Find ALL open PRs by ormealex across every public repo using GitHub search.
+    Returns list of dicts with: number, title, html_url, repo, branch, pr_detail
+    """
+    query = urllib.parse.quote(f"is:pr is:open author:{OWNER}")
+    results = []
+    page = 1
+    while True:
+        data = gh(f"/search/issues?q={query}&per_page=100&page={page}")
+        items = (data or {}).get("items", [])
+        if not items:
+            break
+        for item in items:
+            repo = repo_from_url(item.get("repository_url", ""))
+            number = item["number"]
+            # Fetch full PR details for branch name and merged status
+            pr_detail = gh(f"/repos/{repo}/pulls/{number}") or {}
+            results.append({
+                "number": number,
+                "title": item["title"],
+                "html_url": item["html_url"],
+                "repo": repo,
+                "branch": pr_detail.get("head", {}).get("ref", ""),
+                "pr_detail": pr_detail,
+            })
+        if len(items) < 100:
+            break
+        page += 1
+    return results
 
 
 def max_id(items):
@@ -68,7 +106,10 @@ def max_id(items):
 
 
 def new_items(items, since_id):
-    return [x for x in (items or []) if x["id"] > since_id and not is_ignored(x.get("user", {}).get("login", ""))]
+    return [
+        x for x in (items or [])
+        if x["id"] > since_id and not is_ignored(x.get("user", {}).get("login", ""))
+    ]
 
 
 def post_issue(title, body):
@@ -85,28 +126,35 @@ def main():
         sys.exit(1)
 
     state = load_json(STATE_FILE, {"last_updated": "", "prs": {}})
+
+    print(f"Fetching all open PRs by {OWNER} across all repos...")
     open_prs = get_open_prs()
 
     if not open_prs:
         print("No open PRs found.")
-        save_json(STATE_FILE, {**state, "last_updated": datetime.now(timezone.utc).isoformat()})
+        state["last_updated"] = datetime.now(timezone.utc).isoformat()
+        save_json(STATE_FILE, state)
         return
 
-    print(f"Monitoring {len(open_prs)} open PR(s): {[p['number'] for p in open_prs]}")
+    print(f"Found {len(open_prs)} open PR(s) across {len(set(p['repo'] for p in open_prs))} repo(s)")
+    for pr in open_prs:
+        print(f"  {pr['repo']}#{pr['number']} — {pr['title'][:60]}")
 
     pending_fixes = []
     notification_sections = []
     first_seen = []
 
     for pr in open_prs:
-        num = str(pr["number"])
+        repo = pr["repo"]
+        num = pr["number"]
+        state_key = f"{repo}#{num}"
         title = pr["title"]
         url = pr["html_url"]
-        branch = pr["head"]["ref"]
+        branch = pr["branch"]
+        pr_detail = pr["pr_detail"]
 
-        comments = gh(f"/repos/{TARGET}/issues/{pr['number']}/comments?per_page=100") or []
-        reviews = gh(f"/repos/{TARGET}/pulls/{pr['number']}/reviews") or []
-        pr_detail = gh(f"/repos/{TARGET}/pulls/{pr['number']}") or {}
+        comments = gh(f"/repos/{repo}/issues/{num}/comments?per_page=100") or []
+        reviews = gh(f"/repos/{repo}/pulls/{num}/reviews") or []
 
         current_state = "open"
         if pr_detail.get("merged"):
@@ -114,22 +162,24 @@ def main():
         elif pr_detail.get("state") == "closed":
             current_state = "closed"
 
-        if num not in state["prs"]:
-            # First time seeing — establish baseline only
-            state["prs"][num] = {
+        if state_key not in state["prs"]:
+            # First time seeing this PR — establish baseline, no alert
+            state["prs"][state_key] = {
                 "last_comment_id": max_id(comments),
                 "last_review_id": max_id(reviews),
                 "state": current_state,
                 "title": title,
                 "branch": branch,
+                "repo": repo,
             }
-            first_seen.append(num)
-            print(f"  PR #{num}: baseline established")
+            first_seen.append(state_key)
+            print(f"  {state_key}: baseline established")
             continue
 
-        pr_state = state["prs"][num]
-        pr_state["branch"] = branch  # keep branch up to date
+        pr_state = state["prs"][state_key]
+        pr_state["branch"] = branch
         pr_state["title"] = title
+        pr_state["repo"] = repo
 
         new_comments = new_items(comments, pr_state["last_comment_id"])
         actionable_reviews = [
@@ -141,12 +191,12 @@ def main():
         state_changed = current_state != pr_state.get("state", "open")
 
         if not new_comments and not actionable_reviews and not state_changed:
-            print(f"  PR #{num}: no new activity")
+            print(f"  {state_key}: no new activity")
             continue
 
-        print(f"  PR #{num}: {len(new_comments)} comment(s), {len(actionable_reviews)} review(s), state={current_state}")
+        print(f"  {state_key}: {len(new_comments)} comment(s), {len(actionable_reviews)} review(s), state={current_state}")
 
-        section_lines = [f"### PR #{num}: [{title}]({url}) (branch: `{branch}`)"]
+        section_lines = [f"### [{repo}#{num}]({url}): {title} (branch: `{branch}`)"]
 
         if current_state == "merged":
             section_lines.append("**BOUNTY WON** — PR was merged!")
@@ -164,16 +214,22 @@ def main():
             section_lines.append(f"\n**@{r['user']['login']}** review: `{r['state']}`")
             if r.get("body"):
                 section_lines.append(f"> {r['body'][:500]}")
-                fix_feedback.append({"type": "review", "state": r["state"], "author": r["user"]["login"], "body": r["body"]})
+                fix_feedback.append({
+                    "type": "review",
+                    "state": r["state"],
+                    "author": r["user"]["login"],
+                    "body": r["body"],
+                })
 
         notification_sections.append("\n".join(section_lines))
 
         # Queue a fix if there is actionable feedback and PR is still open
         if fix_feedback and current_state == "open":
             pending_fixes.append({
-                "pr_number": pr["number"],
+                "pr_number": num,
                 "pr_title": title,
                 "pr_url": url,
+                "repo": repo,
                 "branch": branch,
                 "feedback": fix_feedback,
             })
@@ -194,12 +250,11 @@ def main():
         post_issue(f"PR Monitor: activity detected — {today}", body)
 
     if first_seen:
-        print(f"Baseline set for new PR(s): {first_seen}")
+        print(f"Baseline set for: {first_seen}")
 
-    # Write pending fixes for the agent to act on
     if pending_fixes:
         save_json(FIXES_FILE, pending_fixes)
-        print(f"pending_fixes.json written with {len(pending_fixes)} fix(es) to implement.")
+        print(f"pending_fixes.json written — {len(pending_fixes)} fix(es) to implement.")
     elif os.path.exists(FIXES_FILE):
         os.remove(FIXES_FILE)
 
