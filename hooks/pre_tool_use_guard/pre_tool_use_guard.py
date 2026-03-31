@@ -99,11 +99,56 @@ DESTRUCTIVE_PATTERNS = [
             "  • Run the command manually after double-checking the scope."
         ),
     },
+    {
+        "name": "git reset --hard",
+        "pattern": re.compile(
+            r"\bgit\s+reset\b(?:[^\|;&\n]*\s)?--hard\b",
+            re.IGNORECASE,
+        ),
+        "message": (
+            "⛔  Blocked: `git reset --hard` permanently discards all uncommitted changes "
+            "and moves HEAD to a previous commit. Any unstaged or staged work that hasn't "
+            "been committed will be gone forever. Safer alternatives:\n"
+            "  • `git stash` — saves your current changes so you can restore them later\n"
+            "  • `git reset --soft HEAD~1` — undoes the last commit but keeps your changes staged\n"
+            "  • `git restore .` — discards working tree changes file-by-file with more control"
+        ),
+    },
+    {
+        "name": "git clean -fd (force-delete untracked files)",
+        "pattern": re.compile(
+            r"\bgit\s+clean\b(?:[^\|;&\n]*\s)-[^\s]*f[^\s]*d[^\s]*\b|"
+            r"\bgit\s+clean\b(?:[^\|;&\n]*\s)-[^\s]*d[^\s]*f[^\s]*\b",
+            re.IGNORECASE,
+        ),
+        "message": (
+            "⛔  Blocked: `git clean -fd` permanently deletes all untracked files and "
+            "directories — this includes new files you haven't committed yet. "
+            "Safer alternatives:\n"
+            "  • `git clean -n` (dry-run — shows what WOULD be deleted without deleting)\n"
+            "  • `git stash -u` (stashes untracked files so you can restore them)\n"
+            "  • Review `git status` first and delete specific files manually"
+        ),
+    },
+    {
+        "name": "SQL DROP DATABASE",
+        "pattern": re.compile(
+            r"\bDROP\s+DATABASE\b",
+            re.IGNORECASE,
+        ),
+        "message": (
+            "⛔  Blocked: `DROP DATABASE` permanently destroys an entire database — every "
+            "table, index, function, and row it contains. This is irreversible without a "
+            "backup. If this is truly intentional:\n"
+            "  • Take a full backup first: `pg_dump`, `mysqldump`, etc.\n"
+            "  • Verify you're connected to the correct server and database name.\n"
+            "  • Run the command manually in a controlled session."
+        ),
+    },
 ]
 
 
 def _ensure_log_dir() -> None:
-    """Create the hook directory and log file if they don't exist."""
     os.makedirs(HOOK_DIR, exist_ok=True)
     if not os.path.exists(LOG_FILE):
         with open(LOG_FILE, "w") as f:
@@ -112,22 +157,19 @@ def _ensure_log_dir() -> None:
 
 
 def _log_blocked(pattern_name: str, command: str) -> None:
-    """Append a blocked attempt to the log file."""
     _ensure_log_dir()
     timestamp = datetime.now(timezone.utc).isoformat()
     project_path = os.getcwd()
-    # Sanitise newlines so the log stays one-line-per-event
     safe_command = command.replace("\n", " ↵ ").replace("\r", "")
     entry = f"{timestamp} | {pattern_name} | {project_path} | {safe_command}\n"
-    with open(LOG_FILE, "a") as f:
-        f.write(entry)
+    try:
+        with open(LOG_FILE, "a") as f:
+            f.write(entry)
+    except OSError:
+        pass  # never block on log failure
 
 
-def _check_command(command: str) -> tuple[bool, str]:
-    """
-    Check a shell command against all destructive patterns.
-    Returns (is_blocked: bool, message: str).
-    """
+def _check_command(command: str):
     for rule in DESTRUCTIVE_PATTERNS:
         if rule["pattern"].search(command):
             return True, rule["message"], rule["name"]
@@ -135,19 +177,15 @@ def _check_command(command: str) -> tuple[bool, str]:
 
 
 def main() -> None:
-    # ── Read the hook payload from stdin ──────────────────────────────────────
     try:
         payload = json.load(sys.stdin)
     except json.JSONDecodeError as e:
-        # If we can't parse the payload, allow the tool call through rather than
-        # silently blocking legitimate work.
         sys.stderr.write(f"[security-guard] WARNING: could not parse hook payload: {e}\n")
         sys.exit(0)
 
     tool_name: str = payload.get("tool_name", "")
     tool_input: dict = payload.get("tool_input", {})
 
-    # ── Only inspect Bash tool calls ──────────────────────────────────────────
     if tool_name not in ("Bash", "bash", "shell", "run_bash_command"):
         sys.exit(0)
 
@@ -155,16 +193,13 @@ def main() -> None:
     if not command:
         sys.exit(0)
 
-    # ── Run checks ────────────────────────────────────────────────────────────
     blocked, message, pattern_name = _check_command(command)
 
     if blocked:
         _log_blocked(pattern_name, command)
-        # Print a clear explanation for the user / Claude
         print(message, flush=True)
-        sys.exit(1)   # Non-zero exit → tool call is blocked
+        sys.exit(1)
 
-    # Allow the command through
     sys.exit(0)
 
 

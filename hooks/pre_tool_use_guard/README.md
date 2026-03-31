@@ -52,6 +52,9 @@ Add the following to your `~/.claude/settings.json` (create it if it doesn't exi
 | `DROP TABLE` | Permanently deletes a database table and all its data |
 | `TRUNCATE <table>` | Instantly erases all rows, non-transactional in most DBs |
 | `DELETE FROM <table>` *(no WHERE)* | Deletes every row in a table — almost always a mistake |
+| `git reset --hard` | Discards all uncommitted changes, moves HEAD back irreversibly |
+| `git clean -fd` | Permanently deletes untracked files and directories |
+| `DROP DATABASE` | Destroys an entire database and all its data |
 
 ---
 
@@ -93,11 +96,23 @@ echo '{"tool_name":"Bash","tool_input":{"command":"git push --force origin main"
 echo '{"tool_name":"Bash","tool_input":{"command":"DELETE FROM users;"}}' \
   | python3 ~/.claude/hooks/pre_tool_use_guard.py; echo "Exit: $?"
 
+echo '{"tool_name":"Bash","tool_input":{"command":"git reset --hard HEAD~1"}}' \
+  | python3 ~/.claude/hooks/pre_tool_use_guard.py; echo "Exit: $?"
+
+echo '{"tool_name":"Bash","tool_input":{"command":"git clean -fd"}}' \
+  | python3 ~/.claude/hooks/pre_tool_use_guard.py; echo "Exit: $?"
+
+echo '{"tool_name":"Bash","tool_input":{"command":"DROP DATABASE production;"}}' \
+  | python3 ~/.claude/hooks/pre_tool_use_guard.py; echo "Exit: $?"
+
 # Should be ALLOWED (exit 0):
 echo '{"tool_name":"Bash","tool_input":{"command":"ls -la"}}' \
   | python3 ~/.claude/hooks/pre_tool_use_guard.py; echo "Exit: $?"
 
 echo '{"tool_name":"Bash","tool_input":{"command":"DELETE FROM sessions WHERE expires_at < NOW();"}}' \
+  | python3 ~/.claude/hooks/pre_tool_use_guard.py; echo "Exit: $?"
+
+echo '{"tool_name":"Bash","tool_input":{"command":"git stash"}}' \
   | python3 ~/.claude/hooks/pre_tool_use_guard.py; echo "Exit: $?"
 ```
 
