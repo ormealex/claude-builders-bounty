@@ -2,7 +2,7 @@
 
 An **importable n8n workflow** that automatically generates a clear, narrative
 weekly summary of your GitHub repository activity using the **Claude API**, and
-delivers it to Slack or Discord every Friday at 5 PM.
+delivers it to Slack, Discord, or Email/SMTP every Friday at 5 PM.
 
 ---
 
@@ -15,7 +15,7 @@ Every Friday at 17:00 (configurable), the workflow:
 2. Aggregates the data and builds a structured prompt
 3. Sends the prompt to **Claude** (`claude-sonnet-4-20250514`) to generate a
    readable 3-5 paragraph narrative summary
-4. Delivers the summary to **Slack** or **Discord** (your choice, set via env var)
+4. Delivers the summary to **Slack**, **Discord**, or **Email/SMTP** (your choice, set via env var)
 
 ---
 
@@ -34,9 +34,10 @@ In n8n, go to **Variables** (or use a `.env` on self-hosted) and set:
 | `GITHUB_REPO` | `owner/repo` to monitor | `my-org/backend-api` |
 | `GITHUB_TOKEN` | GitHub Personal Access Token (read-only, `repo` scope) | `ghp_xxx...` |
 | `ANTHROPIC_API_KEY` | Your Anthropic API key | `sk-ant-xxx...` |
-| `DELIVERY_CHANNEL` | `slack` or `discord` | `slack` |
+| `DELIVERY_CHANNEL` | `slack`, `discord`, or `email` | `slack` |
 | `SLACK_WEBHOOK_URL` | Slack Incoming Webhook URL (if using Slack) | `https://hooks.slack.com/...` |
 | `DISCORD_WEBHOOK_URL` | Discord Webhook URL (if using Discord) | `https://discord.com/api/webhooks/...` |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASS` / `SMTP_TO` | SMTP credentials (if using email delivery) | see CONFIGURATION.md |
 | `SUMMARY_LANGUAGE` | `EN` or `FR` (default: `EN`) | `EN` |
 
 ### Step 3 — Activate the workflow
@@ -46,7 +47,7 @@ Toggle the workflow to **Active**. It will run automatically every Friday at 17:
 ### Step 4 — Test manually
 
 Click **"Test workflow"** or use the **Execute** button to run it immediately and
-verify the output in your Slack/Discord channel.
+verify the output in your Slack/Discord channel or inbox.
 
 ### Step 5 — (Optional) Customise the schedule
 
@@ -77,8 +78,8 @@ Click the **"Every Friday at 5 PM"** node and change the cron expression:
 [Format Final Message (Code)]
          │
 [Route by Delivery Channel (IF)]
-    ┌────┘────┐
-[Slack]    [Discord]
+    ┌────┼────┐
+[Slack] [Discord] [Email/SMTP]
 ```
 
 ---
@@ -117,7 +118,7 @@ to begin the performance optimisation sprint next week.
 - n8n v1.0+ (self-hosted or n8n Cloud)
 - GitHub Personal Access Token with `repo` scope (read-only)
 - Anthropic API key (`claude-sonnet-4-20250514`)
-- Slack Incoming Webhook or Discord Webhook URL
+- Slack Incoming Webhook URL, Discord Webhook URL, or SMTP credentials (one required)
 
 ---
 
@@ -125,8 +126,7 @@ to begin the performance optimisation sprint next week.
 
 - **Change the Claude model**: Edit the `Call Claude API` node's `body.model` field
 - **Change the language**: Set `SUMMARY_LANGUAGE=FR` for French summaries
-- **Add email delivery**: Fork the final `Route by Delivery Channel` node and add
-  an SMTP or SendGrid node
+- **Use email delivery**: Set `DELIVERY_CHANNEL=email` and configure the SMTP variables — see [CONFIGURATION.md](CONFIGURATION.md)
 - **Monitor multiple repos**: Duplicate the workflow and set different `GITHUB_REPO`
   variables
 
