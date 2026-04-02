@@ -1,0 +1,45 @@
+{
+  "last_updated": "2026-04-02T15:09:04.366512+00:00",
+  "prs": {
+    "claude-builders-bounty/claude-builders-bounty#354": {
+      "last_comment_id": 0,
+      "last_review_id": 0,
+      "state": "open",
+      "title": "feat: CLAUDE.md template for Next.js 15 + SQLite SaaS",
+      "branch": "feature/nextjs-sqlite-claude-md",
+      "repo": "claude-builders-bounty/claude-builders-bounty"
+    },
+    "claude-builders-bounty/claude-builders-bounty#353": {
+      "last_comment_id": 0,
+      "last_review_id": 0,
+      "state": "open",
+      "title": "feat: PR review agent CLI + GitHub Action with inline comments",
+      "branch": "feature/pr-review-agent-and-claude-md",
+      "repo": "claude-builders-bounty/claude-builders-bounty"
+    },
+    "claude-builders-bounty/claude-builders-bounty#352": {
+      "last_comment_id": 0,
+      "last_review_id": 0,
+      "state": "open",
+      "title": "feat: n8n workflow \u2014 automated weekly dev summary via GitHub API + Claude",
+      "branch": "feature/n8n-weekly-summary",
+      "repo": "claude-builders-bounty/claude-builders-bounty"
+    },
+    "claude-builders-bounty/claude-builders-bounty#351": {
+      "last_comment_id": 0,
+      "last_review_id": 0,
+      "state": "open",
+      "title": "feat: SKILL + bash script to auto-generate structured CHANGELOG from git history",
+      "branch": "feature/changelog-skill",
+      "repo": "claude-builders-bounty/claude-builders-bounty"
+    },
+    "claude-builders-bounty/claude-builders-bounty#350": {
+      "last_comment_id": 0,
+      "last_review_id": 0,
+      "state": "open",
+      "title": "feat: pre-tool-use security hook that blocks 8 destructive patterns",
+      "branch": "feature/security-hook-guard",
+      "repo": "claude-builders-bounty/claude-builders-bounty"
+    }
+  }
+}
