@@ -1,0 +1,32 @@
+[
+  {
+    "platform": "claude-builders-bounty",
+    "title": "[BOUNTY $100] HOOK: Pre-tool-use hook that blocks destructive bash commands",
+    "url": "https://github.com/claude-builders-bounty/claude-builders-bounty/issues/3",
+    "budget": 100,
+    "body": "## \ud83d\udcb0 Bounty: $100 \u2014 powered by [Opire](https://opire.dev)\n\n## Description\nCreate a Claude Code `pre-tool-use` hook in Python or bash that intercepts\ndangerous bash commands before they are executed.\n\n## Acceptance Criteria\n- [ ] Hook follows Claude Code hooks format (`~/.claude/hooks/`)\n- [ ] Blocks these patterns: `rm -rf`, `DROP TABLE`, `git push --force`,\n      `TRUNCATE`, `DELETE FROM` without a WHERE clause\n- [ ] Logs every blocked attempt to `~/.claude/hooks/blocked.log`\n      with: timestamp, attempted command, project path\n- [ ] Displays a clear message to Claude explaining why the command was blocked\n- [ ] Does not interfere with normal bash commands\n- [ ] README with installation in 2 commands or fewer\n\n## How to Claim\n1. Comment `/opire try` in this issue\n2. Submit a PR with the hook + README\n3. Payment is released automatically on merge \u2705\n\n## Resources\n- Claude Code hooks docs: https://docs.anthropic.com/claude-code/hooks",
+    "number": 3,
+    "repo": "claude-builders-bounty/claude-builders-bounty",
+    "score": 9
+  },
+  {
+    "platform": "github",
+    "title": "[CAMPAIGN] 5,000 Stars Drive \u2014 Earn Up to 430 RTC (5,000 RTC Pool)",
+    "url": "https://github.com/Scottcjn/Rustchain/issues/425",
+    "budget": 500,
+    "body": "## 5,000 Stars Campaign\n\n**Pool: 5,000 RTC ($500 value)** | Currently at **337 stars** across 86 repos \u2014 need **4,663 more**.\n\n```\n[\u2588\u2588\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591] 6.7% (337/5000)\n```\n\n### Earn RTC by Starring\n\n| Repos Starred | RTC Per Star | Max Payout |\n|---------------|-------------|------------|\n| 1-2 | 1 RTC | 2 RTC |\n| 3-4 | 1.5 RTC | 6 RTC |\n| 5-9 | 2 RTC | 18 RTC |\n| 10-19 | 2.5 RTC | 50 RTC |\n| 20-49 | 3 RTC | 150 RTC |\n| **ALL 86 repos** | **5 RTC** | **430 RTC** |\n\n### Social Amplifier Bonus\n\n| Action | Bonus |\n|--------|-------|\n| Tweet + link | +5 RTC |\n| Dev.to / Medium article | +15 RTC |\n| Reddit post | +10 RTC |\n| HN submission | +25 RTC |\n\n### See All Repos + Live Progress\n\n**[rustchain.org/stars](https://rustchain.org/stars.html)** \u2014 One page with all 86 repos, live star counts, progress bar, and reward calculator.\n\n### Full Bounty Details\n\n**[rustchain-bounties#478](https://github.com/Scottcjn/rustchain-bounties/issues/478)** \u2014 Complete rules, referral bonuses, milestone rewards.\n\n### How to Claim\n\n1. Star repos at [rustchain.org/stars](https://rustchain.org/stars.html)\n2. Reply here or on [#478](https://github.com/Scottcjn/rustchain-bounties/issues/478) with:\n   - GitHub username\n   - Number of repos starred\n   - RTC wallet (`pip install clawrtc && clawrtc wallet create`)\n\n---\n\n*Why 5K? We're working to qualify for the Claude Code Open Source program. Every star counts.*",
+    "number": 425,
+    "repo": "Scottcjn/Rustchain",
+    "score": 8
+  },
+  {
+    "platform": "github",
+    "title": "Search Engine for Bewater",
+    "url": "https://github.com/NonceGeek/bewater/issues/3",
+    "budget": 300,
+    "body": "Buidl Search Engine for Bewater, including simple text search and vector search, for 2 parts in BeWater:\n\n> Campaigns / Projects\n\nSuggestion Bounty: `$300`",
+    "number": 3,
+    "repo": "NonceGeek/bewater",
+    "score": 8
+  }
+]

@@ -1,0 +1,332 @@
+[
+  {
+    "date": "2026-04-02",
+    "platform": "claude-builders-bounty",
+    "title": "[BOUNTY $75] TEMPLATE: CLAUDE.md for a Next.js + SQLite SaaS project",
+    "url": "https://github.com/claude-builders-bounty/claude-builders-bounty/issues/2",
+    "budget": "$75",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "score=6"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "\u62a5\u540d\u540e\u7cfb\u7edf\u81ea\u52a8\u901a\u77e5",
+    "url": "https://github.com/NonceGeek/bewater/issues/6",
+    "budget": "$100",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "score=6"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "Filter for BeWater",
+    "url": "https://github.com/NonceGeek/bewater/issues/4",
+    "budget": "$100",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "score=6"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "Fix building sifir SDK (react-native-tor) for the  iOS simulator so that Blixt can be built for the iOS simulator",
+    "url": "https://github.com/smolcars/blixt-wallet/issues/1144",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "Make a badge (shield) endpoint",
+    "url": "https://github.com/sponsorkit/sponsorkit.io/issues/70",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "Backup to NextCloud",
+    "url": "https://github.com/smolcars/blixt-wallet/issues/366",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "APYs on Earn page are only visible when connected to MetaMask",
+    "url": "https://github.com/SharedStake/SharedStake-ui/issues/69",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "Implement autocompounding of SGT",
+    "url": "https://github.com/SharedStake/SharedStake-ui/issues/21",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "Malicious Dependency Update Bug Bounty",
+    "url": "https://github.com/MetaMask/metamask-extension/issues/6699",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "Seed Phrase Bug Bounty",
+    "url": "https://github.com/MetaMask/metamask-extension/issues/3127",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "Jest globals differ from Node globals",
+    "url": "https://github.com/jestjs/jest/issues/2549",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "Twitter + GitHub login integration [$15]",
+    "url": "https://github.com/ethereumbuilders/eth.hangouts/issues/6",
+    "budget": "$15",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "Double pr testing prod",
+    "url": "https://github.com/OpenQDev/OpenQ-TestRepo/issues/908",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "double pr 2/15",
+    "url": "https://github.com/OpenQDev/OpenQ-TestRepo/issues/880",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "double pr",
+    "url": "https://github.com/OpenQDev/OpenQ-TestRepo/issues/869",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "Share Shipli in college groups for \u20b9100 per share",
+    "url": "https://github.com/prasenjeet-symon/shipli-ai/issues/4",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "Create a marketing explainer video for Shipli",
+    "url": "https://github.com/prasenjeet-symon/shipli-ai/issues/3",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "Create a logo for Shipli",
+    "url": "https://github.com/prasenjeet-symon/shipli-ai/issues/2",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "Add React Native support",
+    "url": "https://github.com/prasenjeet-symon/shipli-ai/issues/1",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "\ud83d\udd39 Bounty: \u20b92000 \u2014PDF REPORT IMPROVEMENTS",
+    "url": "https://github.com/atharvnaik1/GraciasAi-Appstore-Policy-Auditor-Opensource/issues/14",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "create for android module playstore auditor.",
+    "url": "https://github.com/atharvnaik1/GraciasAi-Appstore-Policy-Auditor-Opensource/issues/12",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "Fine tune our prompts and make final reports precise and well written  to industry standards.",
+    "url": "https://github.com/atharvnaik1/GraciasAi-Appstore-Policy-Auditor-Opensource/issues/11",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "Bounty: Design a Logo for Gracias AI App Store Auditor",
+    "url": "https://github.com/atharvnaik1/GraciasAi-Appstore-Policy-Auditor-Opensource/issues/2",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "Bounty: CVPR 2026 Paper Human Evaluation \u2014 2AFC Video Quality Assessment (50 RTC)",
+    "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2274",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "Bounty: Human Evaluation Study \u2014 2AFC Video Quality Assessment (50 RTC)",
+    "url": "https://github.com/Scottcjn/grail-v-emotional-grounding/issues/1",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "\ud83d\udd25 \u60ac\u8d4f\u00a53000\uff1a\u5f00\u53d1\u56e2\u8d2d+\u5916\u5356\u5b9e\u65f6\u81ea\u52a8\u6570\u636e\u76d1\u6d4b\u7cfb\u7edf\uff08OpenClaw + Skills\uff09",
+    "url": "https://github.com/fengking-li/group-buying-data-monitor/issues/1",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "[BOUNTY] Port RustChain Miner to Mac OS 9 via POSIX Shim \u2014 75 RTC",
+    "url": "https://github.com/Scottcjn/rustchain-bounties/issues/440",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "[BOUNTY] Port RustChain Miner to Sega Dreamcast (SH4 Linux) \u2014 150 RTC",
+    "url": "https://github.com/Scottcjn/rustchain-bounties/issues/434",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "[BOUNTY] Refer a Friend Who Completes a Bounty - 3 RTC per referral (Pool: 150 RTC)",
+    "url": "https://github.com/Scottcjn/rustchain-bounties/issues/423",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "[BOUNTY] Register Your Agent on Beacon Atlas - 5 RTC",
+    "url": "https://github.com/Scottcjn/rustchain-bounties/issues/422",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "[BOUNTY] Upload Your First BoTTube Video - 3 RTC",
+    "url": "https://github.com/Scottcjn/rustchain-bounties/issues/421",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "[MICRO-BOUNTY] Share RustChain on Social Media - 2 RTC per post (Pool: 200 RTC)",
+    "url": "https://github.com/Scottcjn/rustchain-bounties/issues/420",
+    "budget": "$0",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "low-budget"
+  },
+  {
+    "date": "2026-04-02",
+    "platform": "github",
+    "title": "Webhook Event System",
+    "url": "https://github.com/rohitdash08/FinMind/issues/77",
+    "budget": "$50",
+    "status": "skipped",
+    "deliverable_path": null,
+    "notes": "score=5"
+  }
+]
