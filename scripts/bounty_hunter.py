@@ -4,11 +4,10 @@ Bounty hunter scanner — finds open bounties across all reachable platforms.
 
 Sources:
   - claude-builders-bounty (direct GitHub issues)
-  - Algora        (GitHub label: algora-bounty + console.algora.io API for known orgs)
+  - Algora        (GitHub label: algora-bounty / 💎 Bounty)
   - IssueHunt     (GitHub label: IssueHunt)
-  - Gitcoin       (REST API: gitcoin.co/api/v0.1/bounties)
-  - GitHub broad  (label variants: bounty, $bounty, has-bounty, Help Wanted+paid)
-  - Contra        (web scrape — Replit's successor platform)
+  - Opire         (GitHub label: opire)
+  - GitHub broad  (label variants: bounty, has-bounty, Help Wanted+bounty)
 
 Outputs shortlist.json for the agent to act on.
 State persisted in attempted_tasks.json.
@@ -49,7 +48,31 @@ SKILL_KEYWORDS = [
     "infrastructure", "devops", "sre", "platform engineering",
     "runbook", "sop", "post-mortem",
     "k6", "load test",
+    "claude code", "claude", "mcp", "llm", "ai agent",
+    "n8n", "workflow", "automation",
+    "hook", "skill", "changelog",
 ]
+
+# Patterns that indicate low-quality or non-deliverable bounties
+JUNK_PATTERNS = [
+    r"\bRTC\b",                               # RustChain token, not real USD
+    r"\bstar[s]?\s+(?:repos?|drive|campaign)\b",  # star campaigns
+    r"\brefer\s+a\s+friend\b",               # referral bounties
+    r"\bsocial\s+media\b",                   # social media promotion
+    r"\bvideo\b.*\bbounty\b",               # video creation bounties
+    r"\blogo\b.*\bbounty\b",                # logo design bounties
+    r"\btweet\b",                            # Twitter/social tasks
+    r"₹",                                    # Indian rupees (very low USD value)
+    r"¥",                                    # Yen
+]
+
+
+def _is_mostly_ascii(text):
+    """Require at least 50% ASCII — filters fully non-English titles."""
+    if not text:
+        return True
+    ascii_chars = sum(1 for c in text if ord(c) < 128)
+    return ascii_chars / len(text) > 0.5
 
 
 # ---------------------------------------------------------------------------
@@ -86,16 +109,6 @@ def fetch_json(url, headers=None):
         return None
 
 
-def fetch_html(url):
-    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-    try:
-        with urllib.request.urlopen(req, timeout=15) as r:
-            return r.read().decode("utf-8", errors="replace")
-    except Exception as e:
-        print(f"  HTML fetch error {url}: {e}", file=sys.stderr)
-        return ""
-
-
 # ---------------------------------------------------------------------------
 # State helpers
 # ---------------------------------------------------------------------------
@@ -124,11 +137,9 @@ def parse_budget(text):
     m = re.search(r"(\d[\d,]*)\s*USD", text, re.IGNORECASE)
     if m:
         return int(m.group(1).replace(",", ""))
-    m = re.search(r"(\d[\d,]*)\s*(USDC|DAI|ETH)", text, re.IGNORECASE)
+    m = re.search(r"(\d[\d,]*)\s*(USDC|DAI)", text, re.IGNORECASE)
     if m:
-        # rough ETH conversion guard — skip if looks like ETH amount
-        val = int(m.group(1).replace(",", ""))
-        return val if m.group(2).upper() in ("USDC", "DAI") else 0
+        return int(m.group(1).replace(",", ""))
     return 0
 
 
@@ -165,13 +176,13 @@ def scan_claude_builders():
 
 
 def scan_algora_github():
-    """Algora bounties announced on GitHub issues (label: algora-bounty or 💎 Bounty)."""
+    """Algora bounties on GitHub issues (label: algora-bounty or 💎 Bounty)."""
     print("Scanning Algora (GitHub labels)...")
     results = []
     seen = set()
     queries = [
         "label:algora-bounty+state:open",
-        'label:"💎 Bounty"+state:open',
+        'label:"💎+Bounty"+state:open',
     ]
     for q in queries:
         data = gh(f"/search/issues?q={urllib.parse.quote(q)}&sort=created&order=desc&per_page=30")
@@ -188,40 +199,7 @@ def scan_algora_github():
                 number=item["number"],
                 repo=repo,
             ))
-    print(f"  {len(results)} Algora bounty/bounties found on GitHub")
-    return results
-
-
-def scan_algora_api():
-    """Algora platform API — known active orgs."""
-    print("Scanning Algora API (known orgs)...")
-    results = []
-    # Sample of active orgs on Algora — expand as needed
-    orgs = ["calcom", "formbricks", "documenso", "twenty", "dub", "Cap", "openbb-finance"]
-    seen = set()
-    for org in orgs:
-        data = fetch_json(f"https://console.algora.io/api/orgs/{org}/bounties?limit=20")
-        for item in (data or {}).get("items", []):
-            if item.get("status") != "active":
-                continue
-            task = item.get("task", {})
-            repo = f"{task.get('repo_owner', '')}/{task.get('repo_name', '')}"
-            issue_url = f"https://github.com/{repo}/issues/{task.get('number', '')}"
-            if issue_url in seen:
-                continue
-            seen.add(issue_url)
-            budget = (item.get("reward") or {}).get("amount", 0)
-            # fetch issue title
-            issue = gh(f"/repos/{repo}/issues/{task.get('number', '')}")
-            title = (issue or {}).get("title", f"{org} bounty #{task.get('number')}")
-            body = (issue or {}).get("body", "")
-            results.append(make_task(
-                "algora",
-                title, issue_url, budget, body,
-                number=task.get("number"),
-                repo=repo,
-            ))
-    print(f"  {len(results)} Algora API bounty/bounties from known orgs")
+    print(f"  {len(results)} Algora bounty/bounties found")
     return results
 
 
@@ -230,11 +208,7 @@ def scan_issuehunt():
     print("Scanning IssueHunt (GitHub labels)...")
     results = []
     seen = set()
-    queries = [
-        "label:IssueHunt+state:open",
-        "label:issuehunt+state:open",
-    ]
-    for q in queries:
+    for q in ["label:IssueHunt+state:open", "label:issuehunt+state:open"]:
         data = gh(f"/search/issues?q={urllib.parse.quote(q)}&sort=created&order=desc&per_page=30")
         for item in (data or {}).get("items", []):
             if item["html_url"] in seen:
@@ -253,46 +227,44 @@ def scan_issuehunt():
     return results
 
 
-def scan_gitcoin():
-    """Gitcoin REST API filtered for infra/devops."""
-    print("Scanning Gitcoin...")
+def scan_opire():
+    """Opire bounties via GitHub label search."""
+    print("Scanning Opire (GitHub labels)...")
     results = []
-    keywords = "kubernetes,ansible,terraform,prometheus,grafana,devops,infrastructure,python,bash,monitoring"
-    url = f"https://gitcoin.co/api/v0.1/bounties/?network=mainnet&status=open&keywords={keywords}&order_by=-web3_created&limit=30"
-    data = fetch_json(url)
-    for item in (data or []):
-        if not item.get("is_open"):
-            continue
-        budget_eth = item.get("value_in_usdt_now") or item.get("value_in_usdt") or 0
-        try:
-            budget = int(float(budget_eth))
-        except (TypeError, ValueError):
-            budget = 0
-        results.append(make_task(
-            "gitcoin",
-            item.get("title", "Untitled"),
-            item.get("url") or item.get("github_url", ""),
-            budget,
-            item.get("issue_description", "") or item.get("description", ""),
-            repo=item.get("github_url", "").replace("https://github.com/", "").rsplit("/issues/", 1)[0],
-        ))
-    print(f"  {len(results)} Gitcoin bounty/bounties found")
+    seen = set()
+    for q in ["label:opire+state:open", "label:opire-bounty+state:open"]:
+        data = gh(f"/search/issues?q={urllib.parse.quote(q)}&sort=created&order=desc&per_page=30")
+        for item in (data or {}).get("items", []):
+            if item["html_url"] in seen:
+                continue
+            seen.add(item["html_url"])
+            budget = parse_budget(item.get("title", "") + " " + (item.get("body") or ""))
+            repo = item.get("repository_url", "").replace("https://api.github.com/repos/", "")
+            results.append(make_task(
+                "opire",
+                item["title"], item["html_url"], budget,
+                item.get("body"),
+                number=item["number"],
+                repo=repo,
+            ))
+    print(f"  {len(results)} Opire bounty/bounties found")
     return results
 
 
 def scan_github_broad():
     """Broad GitHub label search covering common bounty label variants."""
-    print("Scanning GitHub (broad label variants)...")
+    print("Scanning GitHub (broad labels)...")
     results = []
     seen = set()
 
-    skill_terms = "kubernetes+OR+ansible+OR+terraform+OR+prometheus+OR+devops+OR+infrastructure+OR+monitoring+OR+bash+OR+python"
     label_queries = [
-        f"label:bounty+state:open+({skill_terms})",
-        f"label:%22has+bounty%22+state:open",
-        f"label:%22%24bounty%22+state:open",
-        f"label:%22help+wanted%22+label:bounty+state:open",
-        f"label:%22good+first+issue%22+label:bounty+state:open+({skill_terms})",
+        "label:bounty+state:open+language:python",
+        "label:bounty+state:open+language:shell",
+        "label:bounty+state:open+language:dockerfile",
+        "label:bounty+state:open+language:typescript",
+        "label:bounty+state:open+language:go",
+        'label:"has+bounty"+state:open',
+        'label:"help+wanted"+label:bounty+state:open',
     ]
 
     for q in label_queries:
@@ -315,26 +287,29 @@ def scan_github_broad():
     return results
 
 
-def scan_contra():
-    """Contra — Replit's bounty platform successor. HTML scrape for DevOps/infra gigs."""
-    print("Scanning Contra...")
-    results = []
-    html = fetch_html("https://contra.com/opportunities?category=development&subcategory=devops-sysadmin")
-    # Extract opportunity titles and links from JSON embedded in page
-    matches = re.findall(r'"title":"([^"]+)","slug":"([^"]+)"[^}]*"rateMin":(\d+)', html)
-    for title, slug, rate in matches[:20]:
-        budget = int(rate)
-        url = f"https://contra.com/opportunity/{slug}"
-        results.append(make_task("contra", title, url, budget, ""))
-    print(f"  {len(results)} Contra gig(s) found")
-    return results
-
-
 # ---------------------------------------------------------------------------
-# Scoring
+# Scoring and filtering
 # ---------------------------------------------------------------------------
+
+def is_junk(task):
+    """Return True if the task is a low-quality or non-deliverable bounty."""
+    combined = ((task.get("title") or "") + " " + (task.get("body") or ""))
+    title = task.get("title") or ""
+
+    if not _is_mostly_ascii(title):
+        return True
+
+    for pattern in JUNK_PATTERNS:
+        if re.search(pattern, combined, re.IGNORECASE):
+            return True
+
+    return False
+
 
 def score_task(task):
+    if is_junk(task):
+        return 0
+
     score = 5
     budget = task.get("budget", 0)
 
@@ -356,11 +331,10 @@ def score_task(task):
     if any(v in combined for v in vague):
         score -= 2
 
-    # Platform bonuses
     if task.get("platform") == "claude-builders-bounty":
-        score += 1  # known platform, direct PR submission
-    if task.get("platform") in ("algora", "issuehunt"):
-        score += 1  # GitHub-based, can submit PR directly
+        score += 1
+    if task.get("platform") in ("algora", "issuehunt", "opire"):
+        score += 1
 
     return min(max(score, 0), 10)
 
@@ -385,15 +359,12 @@ def main():
 
     remaining = MAX_DAILY_ATTEMPTS - attempts_today
 
-    # Run all scanners
     all_tasks = []
     all_tasks.extend(scan_claude_builders())
     all_tasks.extend(scan_algora_github())
-    all_tasks.extend(scan_algora_api())
     all_tasks.extend(scan_issuehunt())
-    all_tasks.extend(scan_gitcoin())
+    all_tasks.extend(scan_opire())
     all_tasks.extend(scan_github_broad())
-    all_tasks.extend(scan_contra())
 
     # Deduplicate by URL
     seen_urls = set()
@@ -421,14 +392,20 @@ def main():
             shortlist.append(task)
             print(f"  SHORTLIST score={score} ${task.get('budget','?'):>4} [{task['platform']}] {task['title'][:55]}")
         else:
-            reason = "low-budget" if task.get("budget", 0) < MIN_BUDGET else f"score={score}"
+            budget = task.get("budget", 0)
+            if budget < MIN_BUDGET:
+                reason = "low-budget"
+            elif is_junk(task):
+                reason = "junk"
+            else:
+                reason = f"score={score}"
             print(f"  SKIP ({reason}): {task['title'][:60]}")
             skipped_log.append({
                 "date": today,
                 "platform": task["platform"],
                 "title": task["title"],
                 "url": task["url"],
-                "budget": f"${task.get('budget', 0)}",
+                "budget": f"${budget}",
                 "status": "skipped",
                 "deliverable_path": None,
                 "notes": reason,
